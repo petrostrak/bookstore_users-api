@@ -5,10 +5,16 @@ import (
 	"bookstore_users-api/utils/date"
 	"bookstore_users-api/utils/errors"
 	"fmt"
+	"strings"
 )
 
 // User data access object (dao) encapsulates the logic
 // to persist and retrieve a user object from DB
+
+const (
+	indexUniqueEmail = "email_UNIQUE"
+	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, created_at) VALUES(?, ?, ?, ?);"
+)
 
 var (
 	usersDB = make(map[int64]*User)
@@ -35,16 +41,29 @@ func (u *User) Get() *errors.RestErr {
 
 // Save saves a user to the DB
 func (u *User) Save() *errors.RestErr {
-	current := usersDB[u.ID]
-	if current != nil {
-		if current.Email == u.Email {
-			return errors.NewBadRequestError(fmt.Sprintf("email %s already exists", u.Email))
-		}
-		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", u.ID))
+	stmt, err := users_db.Client.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
+	defer stmt.Close()
 
 	u.DateCreated = date.GetNowString()
 
-	usersDB[u.ID] = u
+	// alteratively with lower performance
+	// users_db.Client.Exec(queryInsertUser, u.FirstName, u.LastName, u.Email, u.DateCreated)
+	res, err := stmt.Exec(u.FirstName, u.LastName, u.Email, u.DateCreated)
+	if err != nil {
+		if strings.Contains(err.Error(), indexUniqueEmail) {
+			return errors.NewBadRequestError(fmt.Sprintf("email %s already exists", u.Email))
+		}
+		return errors.NewInternalServerError(fmt.Sprintln("error trying to save user", err.Error()))
+	}
+
+	userID, err := res.LastInsertId()
+	if err != nil {
+		return errors.NewInternalServerError("error while trying to save user")
+	}
+
+	u.ID = userID
 	return nil
 }

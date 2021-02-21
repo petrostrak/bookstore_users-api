@@ -5,17 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
 	Client   *sql.DB
-	username = os.Getenv(env.My_sql_users_username)
-	password = os.Getenv(env.My_sql_users_password)
-	host     = os.Getenv(env.My_sql_users_host)
-	schema   = os.Getenv(env.My_sql_users_schema)
+	username = env.My_sql_users_username
+	password = env.My_sql_users_password
+	host     = env.My_sql_users_host
+	schema   = env.My_sql_users_schema
 )
 
 func init() {
