@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	StatusActive = "active"
+)
+
 // User data transfer object (dto) is the object that we are transfering
 // from the persistance layer, to the application and backwards
 type User struct {
@@ -14,7 +18,7 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"created_at"`
 	Status      string `json:"status"`
-	Password    string `json:"-"`
+	Password    string `json:"password"`
 }
 
 func (u *User) Validate() *errors.RestErr {
@@ -23,6 +27,11 @@ func (u *User) Validate() *errors.RestErr {
 	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
 	if u.Email == "" {
 		return errors.NewBadRequestError("invalid email address")
+	}
+
+	u.Password = strings.TrimSpace(u.Password)
+	if u.Password == "" {
+		return errors.NewBadRequestError("invalid password")
 	}
 	return nil
 }

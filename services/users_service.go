@@ -2,6 +2,7 @@ package services
 
 import (
 	"bookstore_users-api/domain/users"
+	"bookstore_users-api/utils/date"
 	"bookstore_users-api/utils/errors"
 )
 
@@ -12,6 +13,8 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 		return nil, err
 	}
 
+	user.Status = users.StatusActive
+	user.DateCreated = date.GetNowDbFormat()
 	if err := user.Save(); err != nil {
 		return nil, err
 	}

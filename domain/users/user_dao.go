@@ -2,7 +2,6 @@ package users
 
 import (
 	"bookstore_users-api/datasources/mysql/users_db"
-	"bookstore_users-api/utils/date"
 	"bookstore_users-api/utils/errors"
 	"bookstore_users-api/utils/mysql"
 	"fmt"
@@ -13,8 +12,8 @@ import (
 
 const (
 	errorNoRows           = "no rows in result set"
-	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, created_at) VALUES(?, ?, ?, ?);"
-	queryGetUser          = "SELECT id, first_name, last_name, email, created_at FROM users WHERE id=?;"
+	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, created_at, status, password) VALUES(?, ?, ?, ?, ?, ?);"
+	queryGetUser          = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=?;"
 	queryUpdateUser       = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 	queryDeleteUser       = "DELETE FROM users WHERE id=?;"
 	queryFindUserByStatus = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=?;"
@@ -33,7 +32,7 @@ func (u *User) Get() *errors.RestErr {
 	defer stmt.Close()
 
 	res := stmt.QueryRow(u.ID)
-	if getErr := res.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.DateCreated); getErr != nil {
+	if getErr := res.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.DateCreated, &u.Status); getErr != nil {
 		return mysql.ParseError(getErr)
 	}
 
@@ -48,11 +47,9 @@ func (u *User) Save() *errors.RestErr {
 	}
 	defer stmt.Close()
 
-	u.DateCreated = date.GetNowString()
-
 	// alteratively with lower performance
 	// users_db.Client.Exec(queryInsertUser, u.FirstName, u.LastName, u.Email, u.DateCreated)
-	res, saveErr := stmt.Exec(u.FirstName, u.LastName, u.Email, u.DateCreated)
+	res, saveErr := stmt.Exec(u.FirstName, u.LastName, u.Email, u.DateCreated, u.Status, u.Password)
 	if saveErr != nil {
 		mysql.ParseError(saveErr)
 	}
