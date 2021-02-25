@@ -11,10 +11,10 @@ import (
 
 var (
 	Client   *sql.DB
-	username = env.My_sql_users_username
-	password = env.My_sql_users_password
-	host     = env.My_sql_users_host
-	schema   = env.My_sql_users_schema
+	username = env.My_SQL_users_username
+	password = env.My_SQL_users_password
+	host     = env.My_SQL_users_host
+	schema   = env.My_SQL_users_schema
 )
 
 func init() {

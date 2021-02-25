@@ -116,9 +116,5 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	result := make([]interface{}, len(users))
-	for i, user := range users {
-		result[i] = user.Marshall(c.GetHeader("X-Public") == "true")
-	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
 }
