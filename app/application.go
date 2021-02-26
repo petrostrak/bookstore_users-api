@@ -8,6 +8,7 @@ func init() {
 	router = gin.Default()
 }
 
+// StartApp will launch the mapURLs and run the server at :8000
 func StartApp() {
 	mapURLs()
 

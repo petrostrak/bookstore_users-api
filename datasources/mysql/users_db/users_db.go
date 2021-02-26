@@ -6,23 +6,21 @@ import (
 	"fmt"
 	"log"
 
+	// github.com/go-sql-driver/mysql no need to be initialized
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	Client   *sql.DB
-	username = env.My_SQL_users_username
-	password = env.My_SQL_users_password
-	host     = env.My_SQL_users_host
-	schema   = env.My_SQL_users_schema
+	// Client is responsible for the connection to DB
+	Client *sql.DB
 )
 
 func init() {
 	datasourceName := fmt.Sprintf("%s:%s@tcp(%s)/%s",
-		username,
-		password,
-		host,
-		schema)
+		env.MySQLUsersUsername,
+		env.MySQLUsersPassword,
+		env.MySQLUsersHost,
+		env.MySQLUsersSchema)
 	var err error
 	Client, err = sql.Open("mysql", datasourceName)
 	if err != nil {
