@@ -16,7 +16,7 @@ func init() {
 func StartApp() {
 	mapURLs()
 
-	logger.Log.Info("Starting the application...")
+	logger.Info("Starting the application...")
 	if err := router.Run(":8000"); err != nil {
 		panic(err)
 	}
