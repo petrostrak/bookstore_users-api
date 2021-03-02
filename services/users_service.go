@@ -5,6 +5,8 @@ import (
 	"bookstore_users-api/utils/crypto"
 	"bookstore_users-api/utils/date"
 	"bookstore_users-api/utils/errors"
+
+	"github.com/aws/aws-sdk-go/aws/request"
 )
 
 type userService struct{}
@@ -15,6 +17,7 @@ type userServiceInterface interface {
 	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
 	DeleteUser(int64) *errors.RestErr
 	SearchUser(string) (users.Users, *errors.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *errors.RestErr)
 }
 
 // UserService of type userServiceInterface that points to userService{}
@@ -83,4 +86,15 @@ func (us *userService) DeleteUser(userID int64) *errors.RestErr {
 func (us *userService) SearchUser(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
+}
+
+func (us *userService) LoginUser(users.LoginRequest) (*users.User, *errors.RestErr) {
+	dao := &users.User{
+		Email:    request.Email,
+		Password: request.Password,
+	}
+	if err := dao.FindByEmailAndPassword(); err != nil {
+		return nil, err
+	}
+	return dao, nil
 }
