@@ -17,7 +17,7 @@ const (
 	queryUpdateUser             = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 	queryDeleteUser             = "DELETE FROM users WHERE id=?;"
 	queryFindUserByStatus       = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=?;"
-	queryFindByEmailAndPassword = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE email=? and password=?;"
+	queryFindByEmailAndPassword = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE email=? AND password=? AND status=?;"
 )
 
 var (
@@ -143,7 +143,7 @@ func (u *User) FindByEmailAndPassword() *errors.RestErr {
 	}
 	defer stmt.Close()
 
-	res := stmt.QueryRow(u.Email, u.Password)
+	res := stmt.QueryRow(u.Email, u.Password, StatusActive)
 	if getErr := res.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.DateCreated, &u.Status); getErr != nil {
 		logger.Error("error while trying to get user by email and password", getErr)
 		return errors.NewInternalServerError("DB error")
