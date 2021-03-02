@@ -5,8 +5,6 @@ import (
 	"bookstore_users-api/utils/crypto"
 	"bookstore_users-api/utils/date"
 	"bookstore_users-api/utils/errors"
-
-	"github.com/aws/aws-sdk-go/aws/request"
 )
 
 type userService struct{}
@@ -88,10 +86,10 @@ func (us *userService) SearchUser(status string) (users.Users, *errors.RestErr) 
 	return dao.FindByStatus(status)
 }
 
-func (us *userService) LoginUser(users.LoginRequest) (*users.User, *errors.RestErr) {
+func (us *userService) LoginUser(req users.LoginRequest) (*users.User, *errors.RestErr) {
 	dao := &users.User{
-		Email:    request.Email,
-		Password: request.Password,
+		Email:    req.Email,
+		Password: req.Password,
 	}
 	if err := dao.FindByEmailAndPassword(); err != nil {
 		return nil, err
