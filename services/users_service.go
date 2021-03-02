@@ -89,7 +89,7 @@ func (us *userService) SearchUser(status string) (users.Users, *errors.RestErr) 
 func (us *userService) LoginUser(req users.LoginRequest) (*users.User, *errors.RestErr) {
 	dao := &users.User{
 		Email:    req.Email,
-		Password: req.Password,
+		Password: crypto.GetMd5(req.Password),
 	}
 	if err := dao.FindByEmailAndPassword(); err != nil {
 		return nil, err
