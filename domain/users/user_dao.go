@@ -11,12 +11,13 @@ import (
 // to persist and retrieve a user object from DB
 
 const (
-	errorNoRows           = "no rows in result set"
-	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, created_at, status, password) VALUES(?, ?, ?, ?, ?, ?);"
-	queryGetUser          = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=?;"
-	queryUpdateUser       = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
-	queryDeleteUser       = "DELETE FROM users WHERE id=?;"
-	queryFindUserByStatus = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=?;"
+	errorNoRows                 = "no rows in result set"
+	queryInsertUser             = "INSERT INTO users(first_name, last_name, email, created_at, status, password) VALUES(?, ?, ?, ?, ?, ?);"
+	queryGetUser                = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=?;"
+	queryUpdateUser             = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser             = "DELETE FROM users WHERE id=?;"
+	queryFindUserByStatus       = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=?;"
+	queryFindByEmailAndPassword = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE email=? and password=?;"
 )
 
 var (
@@ -131,4 +132,22 @@ func (u *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	}
 
 	return results, nil
+}
+
+// FindByEmailAndPassword returns a user with the given email and password, or an error
+func (u *User) FindByEmailAndPassword() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryFindByEmailAndPassword)
+	if err != nil {
+		logger.Error("error while trying to prepare select query", err)
+		return errors.NewInternalServerError("DB error")
+	}
+	defer stmt.Close()
+
+	res := stmt.QueryRow(u.Email, u.Password)
+	if getErr := res.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.DateCreated, &u.Status); getErr != nil {
+		logger.Error("error while trying to get user by email and password", getErr)
+		return errors.NewInternalServerError("DB error")
+	}
+
+	return nil
 }
