@@ -1,6 +1,7 @@
 package users
 
 import (
+	"bookstore_oauth-go/oauth"
 	"bookstore_users-api/domain/users"
 	"bookstore_users-api/services"
 	"bookstore_users-api/utils/errors"
@@ -56,6 +57,9 @@ func Create(c *gin.Context) {
 
 // Get func passes the context to services
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+	}
 	userID, idErr := getUserId(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Status, idErr)
@@ -66,7 +70,12 @@ func Get(c *gin.Context) {
 		c.JSON(getErr.Status, getErr)
 	}
 
-	c.JSON(http.StatusCreated, user.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == user.ID {
+		c.JSON(http.StatusCreated, user.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusCreated, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 // Update func passes the context to services
